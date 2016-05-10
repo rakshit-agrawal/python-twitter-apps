@@ -14,7 +14,7 @@ URL = {
 }
 
 
-class TwitterActions(object):
+class Twitter(object):
     """
     Class for Twitter action functions.
 
@@ -62,6 +62,7 @@ class TwitterActions(object):
         if media is not None:
             media_url = URL['media_upload']
             media_ids = []
+            media_id_string = ""
 
             for item in media:
                 with open(item, 'rb') as mediafile:
@@ -69,10 +70,12 @@ class TwitterActions(object):
                     media = requests.post(url=media_url, files=dict(media=mediafile), auth=self._auth())
 
                 if media.status_code == requests.codes.ok:
-                    media_ids.append(media.json().get('media_id'))
+                    media_ids.append(str(media.json().get('media_id')))
+
+            media_id_string = ",".join(media_ids)
 
             # Post the tweet with media
-            tweet = requests.post(url=url, auth=self._auth(), params=dict(status=text, media_ids=media_ids))
+            tweet = requests.post(url=url, auth=self._auth(), params=dict(status=text, media_ids=media_id_string))
 
         else:
             # Post a tweet without media
@@ -85,19 +88,19 @@ if __name__ == "__main__":
 
     from credentials import ACCESS_TOKEN, ACCESS_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET
 
-    twitter = TwitterActions(consumer_key=CONSUMER_KEY,
-                             consumer_secret=CONSUMER_SECRET,
-                             access_token=ACCESS_TOKEN,
-                             access_token_secret=ACCESS_TOKEN_SECRET)
+    twitter = Twitter(consumer_key=CONSUMER_KEY,
+                      consumer_secret=CONSUMER_SECRET,
+                      access_token=ACCESS_TOKEN,
+                      access_token_secret=ACCESS_TOKEN_SECRET)
 
-    media_list = ['m01.jpg','m02.jpg','m03.jpg']
-    text = "Random pictures from pixabay"
-
-    tweet1 = twitter.post_tweet(text=text, media=media_list)
-
-    text2 = "Another tweet without any media"
-
-    tweet2 = twitter.post_tweet(text2)
-
-    pprint(tweet1)
-    pprint(tweet2)
+    # media_list = ['m01.jpg','m02.jpg','m03.jpg']
+    # text = "Random pictures from pixabay"
+    #
+    # tweet1 = twitter.post_tweet(text=text, media=media_list)
+    #
+    # text2 = "Another tweet without any media"
+    #
+    # tweet2 = twitter.post_tweet(text2)
+    #
+    # pprint(tweet1)
+    # pprint(tweet2)
