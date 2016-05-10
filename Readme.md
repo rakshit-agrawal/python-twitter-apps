@@ -6,7 +6,6 @@ The functions provided here require singe user token from Twitter which can be o
 
 
 * twitter.py provides main set of functions to operate the API
-* tweepy_use.py has a broken implementation based on tweepy library
 * Four credentials are required to use an application for accessing twitter on user's behalf
 
 Create a file credentials.py in the same directory and set the credential in it as follows:
