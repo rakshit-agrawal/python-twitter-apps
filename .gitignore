@@ -33,3 +33,7 @@ notes/*
 
 ## For outputs
 *outfile*
+
+# Media
+*.jpg
+*.gif
