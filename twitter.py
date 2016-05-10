@@ -62,7 +62,6 @@ class Twitter(object):
         if media is not None:
             media_url = URL['media_upload']
             media_ids = []
-            media_id_string = ""
 
             for item in media:
                 with open(item, 'rb') as mediafile:
