@@ -38,7 +38,7 @@ def _add_to_test_tweets(tweet_id, test_name):
     else:
         tweet_dict = {}
 
-    tweet_dict[test_name]=tweet_id
+    tweet_dict[test_name] = tweet_id
 
     with open(os.path.join(os.getcwd(), TEST_TWEETS), 'wb') as outfile:
         json.dump(tweet_dict, outfile)
@@ -113,7 +113,8 @@ class TestTwitter(unittest.TestCase):
 
         self.assertEqual(len(media_list), len(media_urls))
 
-    @unittest.skipIf(_read_id_top_tweet() is None, "Top ID not available before test. Delete test will not be performed")
+    @unittest.skipIf(_read_id_top_tweet() is None,
+                     "Top ID not available before test. Delete test will not be performed")
     def test_delete_tweet(self):
         """
         Test deletion of tweets.

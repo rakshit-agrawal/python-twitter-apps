@@ -14,5 +14,5 @@ URL = {
     'post_tweet': "https://api.twitter.com/1.1/statuses/update.json",
     'media_upload': "https://upload.twitter.com/1.1/media/upload.json",
     'account_settings': "https://api.twitter.com/1.1/account/settings.json",
-    'destroy_tweet':"https://api.twitter.com/1.1/statuses/destroy/%r.json"
+    'destroy_tweet': "https://api.twitter.com/1.1/statuses/destroy/%r.json"
 }

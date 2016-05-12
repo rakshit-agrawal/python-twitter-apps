@@ -171,7 +171,7 @@ class Twitter(object):
         :return:
         :rtype:
         """
-        url = URL['destroy_tweet']%(tweet_id)
+        url = URL['destroy_tweet'] % (tweet_id)
         deleted_tweet = requests.post(url=url, auth=self._auth())
 
         return deleted_tweet.json()
