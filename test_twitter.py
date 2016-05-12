@@ -1,6 +1,10 @@
+"""
+Unit Tests for functions in twitter.py
+
+-Rakshit Agrawal, 2016
+"""
 import json
 import unittest
-import requests
 import datetime
 import os
 
