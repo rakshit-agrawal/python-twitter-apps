@@ -166,35 +166,3 @@ class Twitter(object):
         deleted_tweet = requests.post(url=url, auth=self._auth())
 
         return deleted_tweet.json()
-
-
-if __name__ == "__main__":
-    # from credentials import twitter_access
-    #
-    # twitter = Twitter(**twitter_access)
-    #
-    # jpegs = ['m01.jpg','m02.jpg','m03.jpg']
-    # media_list = [os.path.join('testing', i) for i in jpegs]
-    # text = "Random pictures from pixabay"
-    #
-    # mresponse = twitter.post_media(media_list)
-    # pprint(mresponse)
-    #
-    # tweet1 = twitter.post_tweet(text=text, media=media_list)
-    # pprint(tweet1)
-    #
-    # # text2 = "Another tweet without any media"
-    # #
-    # # tweet2 = twitter.post_tweet(text2)
-    # # pprint(tweet2)
-    #
-    # #
-    # text2 = "Tweet with a locationat %r" % (datetime.datetime.utcnow())
-    # ll = (37.000880, -122.062309)
-    #
-    # tweet2 = twitter.post_tweet(text2, latlong=ll)
-    # pprint(tweet2)
-    #
-    # # twitter.set_account_settings()
-
-    unittest.main()
