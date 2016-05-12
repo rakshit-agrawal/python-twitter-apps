@@ -1,6 +1,12 @@
 """
-This file contains access to Twitter from a single account using token
+This file contains the main functions to access Twitter.
+In order to see sample calls to these functions, refere to
+example.py and test_twitter.py
 
+The class Twitter provides methods to communicate with Twitter.
+These are based on end points provided by
+
+-Rakshit Agrawal, 2016
 """
 import os
 import unittest
@@ -8,15 +14,7 @@ import datetime
 import requests
 from pprint import pprint
 from requests_oauthlib import OAuth1
-
-URL = {
-    'user_timeline': "https://api.twitter.com/1.1/statuses/user_timeline.json",
-    'search': "https://api.twitter.com/1.1/search/tweets.json",
-    'post_tweet': "https://api.twitter.com/1.1/statuses/update.json",
-    'media_upload': "https://upload.twitter.com/1.1/media/upload.json",
-    'account_settings': "https://api.twitter.com/1.1/account/settings.json",
-    'destroy_tweet':"https://api.twitter.com/1.1/statuses/destroy/%r.json"
-}
+from twitter_public_api import URL
 
 DATE_FORMAT = "%a, %d %b %Y %H:%M:%S"
 
@@ -40,6 +38,7 @@ class Twitter(object):
     def __init__(self, consumer_key, consumer_secret, access_token, access_token_secret):
         """
         Initialize the authentication paramters
+        Calls to twitter will not succeed in the absence of any parameter
 
         """
         self.consumer_key = consumer_key
@@ -56,11 +55,12 @@ class Twitter(object):
 
     def get_account_settings(self, **args):
         """
+        Get settings for user account.
 
-        :param args:
-        :type args:
-        :return:
-        :rtype:
+        (Under construction)
+
+        :return:Dictionary of settings provided by Twitter
+        :rtype: dict
         """
         url = URL['account_settings']
         settings = requests.get(url=url, auth=self._auth())
@@ -79,8 +79,8 @@ class Twitter(object):
         :type use_id: bool
         :param count: Number of tweets to fetch from the timeline
         :type count: int
-        :return:
-        :rtype:
+        :return: List of tweets on user timeline starting from latest
+        :rtype: list
         """
         url = URL['user_timeline']
         if using_id:
@@ -99,6 +99,8 @@ class Twitter(object):
         """
         Post media on twitter.
         Follows the Media API by twitter (https://dev.twitter.com/rest/media)
+
+        This function is used by post_twitter for uploading media
 
         :param media_list: List of media file names (relative paths)
         :type media_list: list
@@ -120,7 +122,11 @@ class Twitter(object):
 
     def post_tweet(self, text, media=None, latlong=None):
         """
-        Post a tweet
+        Post a tweet.
+        A tweet can contain
+            - only text
+            - text and location
+            - text, media and location
 
         Based on https://dev.twitter.com/rest/reference/post/statuses/update
 
@@ -152,11 +158,14 @@ class Twitter(object):
         # Post tweet
         tweet = requests.post(url=url, auth=self._auth(), params=params)
 
-        return tweet.json()
+        if tweet.status_code == requests.codes.ok:
+            return tweet.json()
 
     def delete_tweet(self, tweet_id):
         """
         Delete tweet with the tweet ID
+        Tweet ID should belong to a tweet by the user signed up with Access Tokens
+
         :param tweet_id: ID of tweet to be deleted
         :type tweet_id: int
         :return:
