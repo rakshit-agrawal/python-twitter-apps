@@ -2,6 +2,9 @@
 This file contains access to Twitter from a single account using token
 
 """
+import os
+import unittest
+import datetime
 import requests
 from pprint import pprint
 from requests_oauthlib import OAuth1
@@ -11,7 +14,15 @@ URL = {
     'search': "https://api.twitter.com/1.1/search/tweets.json",
     'post_tweet': "https://api.twitter.com/1.1/statuses/update.json",
     'media_upload': "https://upload.twitter.com/1.1/media/upload.json",
+    'account_settings': "https://api.twitter.com/1.1/account/settings.json",
+    'destroy_tweet':"https://api.twitter.com/1.1/statuses/destroy/%r.json"
 }
+
+DATE_FORMAT = "%a, %d %b %Y %H:%M:%S"
+
+
+def _timenow():
+    return datetime.datetime.utcnow().strftime(DATE_FORMAT)
 
 
 class Twitter(object):
@@ -43,7 +54,71 @@ class Twitter(object):
         """
         return OAuth1(self.consumer_key, self.consumer_secret, self.access_token, self.access_token_secret)
 
-    def post_tweet(self, text, media=None):
+    def get_account_settings(self, **args):
+        """
+
+        :param args:
+        :type args:
+        :return:
+        :rtype:
+        """
+        url = URL['account_settings']
+        settings = requests.get(url=url, auth=self._auth())
+
+        if settings.status_code == requests.codes.ok:
+            return settings.json()
+
+    def get_user_timeline(self, user, using_id=False, count=10):
+        """
+        Get timeline for user specified by the user parameter.
+        Can use either user's screen_name or user_id
+
+        :param user: screen_name (twitter handle) or user_id for the user. user_id will be used only if use_id is set to True
+        :type user: str
+        :param use_id: Use the User ID if this value is set to True. Default is False
+        :type use_id: bool
+        :param count: Number of tweets to fetch from the timeline
+        :type count: int
+        :return:
+        :rtype:
+        """
+        url = URL['user_timeline']
+        if using_id:
+            params = dict(user_id=user)
+        else:
+            params = dict(screen_name=user)
+
+        params['count'] = count
+
+        timeline = requests.get(url=url, auth=self._auth(), params=params)
+
+        if timeline.status_code == requests.codes.ok:
+            return timeline.json()
+
+    def post_media(self, media_list):
+        """
+        Post media on twitter.
+        Follows the Media API by twitter (https://dev.twitter.com/rest/media)
+
+        :param media_list: List of media file names (relative paths)
+        :type media_list: list
+        :return: List of media upload dicts
+        :rtype: list
+        """
+
+        media_url = URL['media_upload']
+        media_dicts = []
+
+        for item in media_list:
+            with open(item, 'rb') as mediafile:
+                # Upload media to Twitter and get its ID
+                media = requests.post(url=media_url, files=dict(media=mediafile), auth=self._auth())
+
+            if media.status_code == requests.codes.ok:
+                media_dicts.append(media.json())
+        return media_dicts
+
+    def post_tweet(self, text, media=None, latlong=None):
         """
         Post a tweet
 
@@ -53,53 +128,73 @@ class Twitter(object):
         :type text: str
         :param media: List of media items to be added with tweet
         :type media: list
+        :param latlong: Tuple with latitutde and longitude in the format (latitude, longitude).
+        This feature will only work if location settings are turned on for the user account. To set them on, go to https://twitter.com/settings/security
+        In the Security and privacy tab, select the Tweet location feature to turn it on.
+        :type latlong: tuple
         :return: JSON response from twitter
         :rtype: dict
         """
         url = URL['post_tweet']
+        params = dict(status=text)
 
         # Upload media to Twitter if any
         if media is not None:
-            media_url = URL['media_upload']
-            media_ids = []
+            media_dicts = self.post_media(media)
+            params['media_ids'] = ",".join([i.get('media_id_string') for i in media_dicts])
 
-            for item in media:
-                with open(item, 'rb') as mediafile:
-                    # Upload media to Twitter and get its ID
-                    media = requests.post(url=media_url, files=dict(media=mediafile), auth=self._auth())
+        # Add location if provides
+        if latlong is not None:
+            params['lat'], params['long'] = latlong
 
-                if media.status_code == requests.codes.ok:
-                    media_ids.append(str(media.json().get('media_id')))
+        print params
 
-            media_id_string = ",".join(media_ids)
-
-            # Post the tweet with media
-            tweet = requests.post(url=url, auth=self._auth(), params=dict(status=text, media_ids=media_id_string))
-
-        else:
-            # Post a tweet without media
-            tweet = requests.post(url=url, auth=self._auth(), params=dict(status=text))
+        # Post tweet
+        tweet = requests.post(url=url, auth=self._auth(), params=params)
 
         return tweet.json()
 
+    def delete_tweet(self, tweet_id):
+        """
+        Delete tweet with the tweet ID
+        :param tweet_id: ID of tweet to be deleted
+        :type tweet_id: int
+        :return:
+        :rtype:
+        """
+        url = URL['destroy_tweet']%(tweet_id)
+        deleted_tweet = requests.post(url=url, auth=self._auth())
+
+        return deleted_tweet.json()
+
 
 if __name__ == "__main__":
-
-    from credentials import ACCESS_TOKEN, ACCESS_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET
-
-    twitter = Twitter(consumer_key=CONSUMER_KEY,
-                      consumer_secret=CONSUMER_SECRET,
-                      access_token=ACCESS_TOKEN,
-                      access_token_secret=ACCESS_TOKEN_SECRET)
-
-    # media_list = ['m01.jpg','m02.jpg','m03.jpg']
+    # from credentials import twitter_access
+    #
+    # twitter = Twitter(**twitter_access)
+    #
+    # jpegs = ['m01.jpg','m02.jpg','m03.jpg']
+    # media_list = [os.path.join('testing', i) for i in jpegs]
     # text = "Random pictures from pixabay"
     #
+    # mresponse = twitter.post_media(media_list)
+    # pprint(mresponse)
+    #
     # tweet1 = twitter.post_tweet(text=text, media=media_list)
-    #
-    # text2 = "Another tweet without any media"
-    #
-    # tweet2 = twitter.post_tweet(text2)
-    #
     # pprint(tweet1)
+    #
+    # # text2 = "Another tweet without any media"
+    # #
+    # # tweet2 = twitter.post_tweet(text2)
+    # # pprint(tweet2)
+    #
+    # #
+    # text2 = "Tweet with a locationat %r" % (datetime.datetime.utcnow())
+    # ll = (37.000880, -122.062309)
+    #
+    # tweet2 = twitter.post_tweet(text2, latlong=ll)
     # pprint(tweet2)
+    #
+    # # twitter.set_account_settings()
+
+    unittest.main()

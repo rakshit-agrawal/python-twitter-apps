@@ -37,3 +37,8 @@ notes/*
 # Media
 *.jpg
 *.gif
+!testing/m01.jpg
+!testing/m02.jpg
+!testing/m03.jpg
+!testing/media01.gif
+testing/*.json
