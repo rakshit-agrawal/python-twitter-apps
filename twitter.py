@@ -153,9 +153,7 @@ class Twitter(object):
         if latlong is not None:
             params['lat'], params['long'] = latlong
 
-        print params
-
-        # Post tweet
+       # Post tweet
         tweet = requests.post(url=url, auth=self._auth(), params=params)
 
         if tweet.status_code == requests.codes.ok:
