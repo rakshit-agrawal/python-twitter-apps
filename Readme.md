@@ -4,7 +4,8 @@ Rakshit Agrawal, 2016
 This repository provides some basic functions to communicate with Twitter using [Public API](https://dev.twitter.com/rest/public) provided by Twitter.
 
 ## Dependencies
-This code uses Python [Requests](http://docs.python-requests.org/en/master/) library which is not provided by default Python installation 
+This code uses Python [Requests](http://docs.python-requests.org/en/master/) library which is not provided by default Python installation.
+It also used [Request-OAuthlib](https://requests-oauthlib.readthedocs.io/en/latest/) for OAuth functions.
 
 
 ## Overview
